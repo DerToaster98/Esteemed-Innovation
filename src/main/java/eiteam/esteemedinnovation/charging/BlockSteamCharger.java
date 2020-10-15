@@ -15,6 +15,7 @@ import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.util.EnumBlockRenderType;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -43,7 +44,7 @@ public class BlockSteamCharger extends BlockSteamTransporter implements Wrenchab
 
     @Override
     public IBlockState getStateFromMeta(int meta) {
-        return getDefaultState().withProperty(FACING, EnumFacing.byHorizontalIndex(meta));
+        return getDefaultState().withProperty(FACING, EnumFacing.getHorizontal(meta));
     }
 
     @Override
@@ -145,9 +146,9 @@ public class BlockSteamCharger extends BlockSteamTransporter implements Wrenchab
     public boolean isOpaqueCube(IBlockState state) {
         return false;
     }
-
+    
     @Override
-    public BlockRenderLayer getRenderLayer() {
+    public BlockRenderLayer getBlockLayer() {
         return BlockRenderLayer.CUTOUT;
     }
 }

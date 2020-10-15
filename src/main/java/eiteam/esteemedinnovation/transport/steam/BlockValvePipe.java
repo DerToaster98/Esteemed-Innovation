@@ -39,7 +39,7 @@ public class BlockValvePipe extends BlockSteamPipe {
 
     @Override
     public IBlockState getStateFromMeta(int meta) {
-        return getDefaultState().withProperty(FACING, EnumFacing.byIndex(meta));
+        return getDefaultState().withProperty(FACING, EnumFacing.values()[meta]);
     }
 
     @Override
@@ -53,7 +53,11 @@ public class BlockValvePipe extends BlockSteamPipe {
         if (tileEntity != null && tileEntity instanceof TileEntityValvePipe &&
           world.getBlockState(neighbor).canProvidePower()) {
             TileEntityValvePipe valve = (TileEntityValvePipe) tileEntity;
-            boolean isNotPowered = tileEntity.getWorld().getRedstonePowerFromNeighbors(pos) <= 0;
+            int power = 0;
+            for(EnumFacing face : EnumFacing.values()) {
+            	power += tileEntity.getWorld().getRedstonePower(pos, face);
+            }
+            boolean isNotPowered = power <= 0;
             valve.updateRedstoneState(isNotPowered);
         }
     }

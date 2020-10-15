@@ -181,17 +181,15 @@ public class EsteemedInnovation {
             isToolTab = toolTab;
         }
 
-
-        @Nonnull
-        @Override
-        @SideOnly(Side.CLIENT)
-        public ItemStack createIcon() {
-            return new ItemStack(isToolTab ? BRASS_PICKAXE : BOOK);
-        }
-
         @Override
         public boolean hasSearchBar() {
             return !isToolTab;
         }
+
+
+		@Override
+		public ItemStack getTabIconItem() {
+			return new ItemStack(isToolTab ? BRASS_PICKAXE : BOOK);
+		}
     }
 }
