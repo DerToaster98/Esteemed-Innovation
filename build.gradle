@@ -1,98 +1,65 @@
-import org.ajoberstar.grgit.Grgit
-
-import java.nio.file.Files
-import java.nio.file.Paths
-import groovy.json.JsonSlurper
-import groovy.json.JsonOutput
-
 buildscript {
     repositories {
-        mavenCentral()
-        maven {
-            name = "forge"
-            url = "http://files.minecraftforge.net/maven"
-        }
-
-        maven {
-            name = "sonatype"
-            url = "https://oss.sonatype.org/content/repositories/snapshots/"
-        }
+        maven { url = 'https://files.minecraftforge.net/maven' }
         jcenter()
+        mavenCentral()
     }
-
     dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
-        classpath 'org.ajoberstar:grgit:1.1.0'
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:3.+'
     }
 }
-
-apply plugin: 'net.minecraftforge.gradle.forge'
-apply plugin: 'java'
-apply plugin: 'com.jfrog.bintray'
+        
+apply plugin: 'net.minecraftforge.gradle'
+// Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
+apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = newModVersion + '-api' + newAPIVersion
+version = '1.0'
+group = 'com.yourname.modid' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = 'modid'
 
-/*
-Usage: `gradle build -Palpha=<version>` where <version> is the next version (different from newModVersion because
-that is updated when we are releasing an actual public update. Modifying that makes reading commit history much more
-confusing). It increments the .alphaversion file's first line at the end, so it can be thought of as "the next alpha version".
-
-Example: `gradle build -Palpha=1.0.0 -Pdev` => version # 1.0.0-alpha1-<commit>
-*/
-static def incrementAlphaVersion(int currentValue) {
-    def file = new File('.alphaversion')
-    file.newWriter()
-    file << "${currentValue + 1}"
-}
-
-def getAlphaVersion() {
-    if (!Files.exists(Paths.get('.alphaversion'))) {
-        new File('.alphaversion').createNewFile()
-        incrementAlphaVersion(0)
-    }
-    new File('.alphaversion').withReader { return it.readLine() }
-}
-
-int alpha = getAlphaVersion().toInteger()
-
-if (project.hasProperty('alpha')) {
-    version = project.property('alpha') + "-alpha" + alpha
-}
-
-if (project.hasProperty('dev')) {
-    def git = Grgit.open(dir: '.')
-    project.version += '-' + git.head().getAbbreviatedId(6)
-}
-
-task finalize << {
-    if (project.hasProperty('alpha')) {
-        incrementAlphaVersion(alpha)
-    }
-
-    // This file is genereated by processResources before getting put into the jar.
-    new File('./mcmod.info').delete()
-}
-
-build.finalizedBy(finalize)
-
-group = "eiteam.esteemedinnovation"
-archivesBaseName = "EsteemedInnovation-1.12"
-
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
 
 minecraft {
-    version = project.forgeVersion
-    mappings = project.mcpMappings
-    runDir = "eclipse"
-    replace "@VERSION@", newModVersion
-    replace "@APIVERSION@", newAPIVersion
+    // The mappings can be changed at any time, and must be in the following format.
+    // snapshot_YYYYMMDD   Snapshot are built nightly.
+    // stable_#            Stables are built at the discretion of the MCP team.
+    // Use non-default mappings at your own risk. they may not always work.
+    // Simply re-run your setup task after changing the mappings to update your workspace.
+    //mappings channel: 'snapshot', version: '20171003-1.12'
+    mappings channel: 'snapshot', version: '20171003-1.12'
+    // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
+    
+    // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+
+    // Default run configurations.
+    // These can be tweaked, removed, or duplicated as needed.
+    runs {
+        client {
+            workingDirectory project.file('run')
+
+            // Recommended logging data for a userdev environment
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+
+            // Recommended logging level for the console
+            property 'forge.logging.console.level', 'debug'
+        }
+
+        server {
+
+            // Recommended logging data for a userdev environment
+            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
+
+            // Recommended logging level for the console
+            property 'forge.logging.console.level', 'debug'
+        }
+    }
 }
 
 repositories {
-    maven {
+    maven { url = 'https://maven.mcmoddev.com/' }
+	
+	maven {
         name = "ic2"
         url = "http://maven.ic2.player.to/"
     }
@@ -133,112 +100,72 @@ repositories {
 }
 
 dependencies {
-    compile mantleVersion
+    // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
+    // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
+    // The userdev artifact is a special name and will get all sorts of transformations applied to it.
+    minecraft "net.minecraftforge:forge:1.12.2-${forge_version}"
+
+    // You may put jars on which you depend on in ./libs or you may define them like so..
+    // compile "some.group:artifact:version:classifier"
+    // compile "some.group:artifact:version"
+
+    // Real examples
+    // compile 'com.mod-buildcraft:buildcraft:6.0.8:dev'  // adds buildcraft to the dev env
+    // compile 'com.googlecode.efficient-java-matrix-library:ejml:0.24' // adds ejml to the dev env
+
+    // The 'provided' configuration is for optional dependencies that exist at compile-time but might not at runtime.
+    // provided 'com.mod-buildcraft:buildcraft:6.0.8:dev'
+
+    // These dependencies get remapped to your current MCP mappings
+    // deobf 'com.mod-buildcraft:buildcraft:6.0.8:dev'
+
+    // For more info...
+    // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
+    // http://www.gradle.org/docs/current/userguide/dependency_management.html
+
+	compile mantleVersion
     compile ticVersion
     compile naturaVersion
-    // compile ic2Version
     compile jeiVersion
-    deobfCompile cclibVersion
+    compile cclibVersion
     compile wailaVersion
-    deobfCompile enchiridionVersion
+    compile enchiridionVersion
     compile craftTweaker2APIVersion
     compile craftTweaker2Version
     compile baublesVersion
-//    These are dependent on libs which do not compile successfully.
-//    compile eioVersion
-//    compile ecoreVersion
-
-    // Avoiding using the generic "lib".
-    compile fileTree(dir: 'eilib', include: '*.jar')
-
-    testCompile sourceSets.api.getOutput()
-    testCompile 'junit:junit:4.12'
+	compile fileTree(dir: 'eilib', include: '*.jar')
 }
 
-processResources {
-    // Combine the main and api mcmod.info files and replace their versions.
-    def slurper = new JsonSlurper()
-
-    def mainInfo = new File('src/main/resources/mcmod.info').text
-    def apiInfo = new File('src/api/resources/mcmod.info').text
-
-    def mainJson = slurper.parseText(mainInfo)
-    def apiJson = slurper.parseText(apiInfo)
-
-    mainJson[0].version = newModVersion
-    apiJson[0].version = newAPIVersion
-
-    def outputInfo = [
-            mainJson[0],
-            apiJson[0]
-    ]
-
-    new File('./mcmod.info').write(JsonOutput.toJson(outputInfo))
-
-    from 'mcmod.info'
-
-    from(sourceSets.main.resources.srcDirs) {
-        exclude 'mcmod.info'
-    }
-
-    from(sourceSets.api.resources.srcDirs) {
-        exclude 'mcmod.info'
-    }
-}
-
-// TODO: Automate for when a new API package is built/published.
-javadoc {
-    source = sourceSets.api.allJava
-    destinationDir = file('./docs/')
-    options.memberLevel = JavadocMemberLevel.PRIVATE
-    title = 'Esteemed Innovation API version ' + newAPIVersion
-}
-
-task apiJar(type: Jar) {
-    version = newAPIVersion
-    classifier = 'api'
-    from sourceSets.api.output
-    from(sourceSets.api.resources.srcDirs) {
-        include 'mcmod.info'
-        filter {
-            it.replaceAll('@APIVERSION@', newAPIVersion)
-        }
-    }
-
-    from(sourceSets.api.resources) {
-        exclude 'mcmod.info'
-    }
-}
-
+// Example for how to get properties into the manifest for reading by the runtime..
 jar {
-    dependsOn compileApiJava
-    from sourceSets.api.output.classesDir
+    manifest {
+        attributes([
+            "Specification-Title": "examplemod",
+            "Specification-Vendor": "examplemodsareus",
+            "Specification-Version": "1", // We are version 1 of ourselves
+            "Implementation-Title": project.name,
+            "Implementation-Version": "${version}",
+            "Implementation-Vendor" :"examplemodsareus",
+            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
 }
 
-artifacts {
-    archives apiJar
-}
+// Example configuration to allow publishing using the maven-publish task
+// This is the preferred method to reobfuscate your jar file
+jar.finalizedBy('reobfJar') 
+// However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing
+//publish.dependsOn('reobfJar')
 
 publishing {
     publications {
-        apiPublication(MavenPublication) {
-            artifact apiJar
+        mavenJava(MavenPublication) {
+            artifact jar
         }
     }
-}
-
-bintray {
-    if (System.hasProperty('bintray_user') && System.hasProperty('bintray_key')) {
-        user = bintray_user
-        key = bintray_key
-        publications = ['apiPublication'] 
-        pkg {
-            repo = 'Esteemed-Innovation'
-            name = 'Releases'
-            userOrg = 'esteemed-innovation'
-            version {
-                name = project.version
-            }
+    repositories {
+        maven {
+            url "file:///${project.projectDir}/mcmodsrepo"
         }
     }
 }
