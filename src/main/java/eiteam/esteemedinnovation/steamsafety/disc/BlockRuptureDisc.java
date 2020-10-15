@@ -45,7 +45,7 @@ public class BlockRuptureDisc extends Block {
     public IBlockState getStateFromMeta(int meta) {
         return getDefaultState()
           .withProperty(IS_BURST, (meta & 8) != 0)
-          .withProperty(FACING, EnumFacing.values()[meta & 7]);
+          .withProperty(FACING, EnumFacing.VALUES[meta & 7]);
     }
 
     @Override

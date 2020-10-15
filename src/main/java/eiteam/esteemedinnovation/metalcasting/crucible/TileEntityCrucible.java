@@ -135,7 +135,7 @@ public class TileEntityCrucible extends TileEntityTickableSafe {
         EnumFacing myDir = state.getValue(BlockCrucible.FACING);
 
         int power = 0;
-        for(EnumFacing face : EnumFacing.values()) {
+        for(EnumFacing face : EnumFacing.VALUES) {
         	power += world.getRedstonePower(pos, face);
         }
         if (power > 0) {

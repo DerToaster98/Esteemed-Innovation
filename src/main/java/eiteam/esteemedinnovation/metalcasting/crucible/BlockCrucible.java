@@ -70,7 +70,7 @@ public class BlockCrucible extends Block implements Wrenchable {
     @Nonnull
     @Override
     public IBlockState getStateFromMeta(int meta) {
-        EnumFacing dir = EnumFacing.values()[meta];
+        EnumFacing dir = EnumFacing.VALUES[meta];
 
         if (dir.getAxis() == EnumFacing.Axis.Y) {
             dir = EnumFacing.NORTH;

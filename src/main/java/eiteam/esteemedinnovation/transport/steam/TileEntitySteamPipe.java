@@ -228,7 +228,7 @@ public class TileEntitySteamPipe extends SteamTransporterTileEntity implements W
         HashSet<EnumFacing> out = new HashSet<>();
         HashSet<EnumFacing> blacklist = new HashSet<>();
         for (int i : blacklistedSides) {
-            blacklist.add(EnumFacing.values()[i]);
+            blacklist.add(EnumFacing.VALUES[i]);
         }
         for (EnumFacing d : distributionDirections) {
             if (!blacklist.contains(d)) {
@@ -408,13 +408,13 @@ public class TileEntitySteamPipe extends SteamTransporterTileEntity implements W
             //Make sure that you can't make an 'end cap' by allowing less than 2 directions to connect
             int sidesConnect = 0;
             for (int i = 0; i < 6; i++) {
-                if (doesConnect(EnumFacing.values()[i])) {
+                if (doesConnect(EnumFacing.VALUES[i])) {
                     sidesConnect++;
                 }
             }
             boolean netChange = false;
             //If does connect on this side, and has adequate sides left
-            EnumFacing direction = EnumFacing.values()[subHit];
+            EnumFacing direction = EnumFacing.VALUES[subHit];
             if (doesConnect(direction)) {
                 BlockPos offsetPos = getOffsetPos(direction);
                 TileEntity tile = world.getTileEntity(offsetPos);

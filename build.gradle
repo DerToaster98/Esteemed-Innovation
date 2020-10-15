@@ -128,7 +128,6 @@ dependencies {
     compile naturaVersion
     compile jeiVersion
     compile cclibVersion
-    compile wailaVersion
     compile enchiridionVersion
     compile craftTweaker2APIVersion
     compile craftTweaker2Version
